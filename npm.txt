@@ -1,0 +1,4 @@
+npm init -y
+npm install express mongoose dotenv cors
+npm install express --save
+npm install -g nodemon
