@@ -1,7 +1,8 @@
-const mongoose = require('./backend/models/mongo_connection_pool');
+const { mongoose } = require('./mongo_connection_pool');
+const { Schema } = mongoose;
 
 // Esquema de Género
-const GeneroSchema = new mongoose.Schema({
+const GeneroSchema = new Schema({
     nombre: { 
         type: String,
         required: true,
