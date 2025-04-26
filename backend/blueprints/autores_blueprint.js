@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { Autor } = require('../models/mongo_autores_model');
+const mongoose = require('mongoose');
 
 // Ruta para crear un nuevo autor
 router.post('/crear_autor', async (req, res) => {
@@ -26,6 +27,98 @@ router.post('/crear_autor', async (req, res) => {
         res.status(400).json({
             success: false,
             message: 'Error al crear el autor',
+            error: error.message
+        });
+    }
+});
+
+// Ruta para listar todos los autores
+router.get('/', async (req, res) => {
+    try {
+        const autores = await Autor.find();
+        
+        if (autores.length === 0) {
+            return res.status(200).json({
+                success: true,
+                message: 'No hay autores registrados',
+                data: []
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Autores encontrados',
+            data: autores
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al buscar autores',
+            error: error.message
+        });
+    }
+});
+
+// Ruta para obtener un autor específico por ID
+router.get('/:id', async (req, res) => {
+    try {
+        const autor = await Autor.findById(req.params.id);
+        
+        if (!autor) {
+            return res.status(404).json({
+                success: false,
+                message: 'Autor no encontrado'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Autor encontrado',
+            data: autor
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al buscar el autor',
+            error: error.message
+        });
+    }
+});
+
+// Ruta para obtener los libros de un autor específico
+router.get('/:id/libros', async (req, res) => {
+    try {
+        const autor = await Autor.findById(req.params.id);
+        
+        if (!autor) {
+            return res.status(404).json({
+                success: false,
+                message: 'Autor no encontrado'
+            });
+        }
+
+        // Buscar los libros del autor en la colección de Libros
+        const libros = await mongoose.connection.collection('Libros')
+            .find({ autores: autor.nombre })
+            .toArray();
+
+        if (libros.length === 0) {
+            return res.status(200).json({
+                success: true,
+                message: 'No hay libros registrados para este autor',
+                data: []
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Libros del autor encontrados',
+            data: libros
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al buscar los libros del autor',
             error: error.message
         });
     }
