@@ -228,7 +228,7 @@ router.put('/actualizar/:id/titulo', async (req, res) => {
         const libroActualizado = await Libro.findByIdAndUpdate(
             req.params.id,
             { titulo },
-            { new: true }
+            { new: true, runValidators: true }
         );
 
         if (!libroActualizado) {
@@ -252,12 +252,50 @@ router.put('/actualizar/:id/titulo', async (req, res) => {
     }
 });
 
+// Ruta para actualizar la sinopsis de un libro
+router.put('/actualizar/:id/sinopsis', async (req, res) => {
+    try {
+        const { sinopsis } = req.body;
+
+        if (!sinopsis) {
+            return res.status(400).json({
+                success: false,
+                message: 'La sinopsis es requerida'
+            });
+        }
+
+        const libroActualizado = await Libro.findByIdAndUpdate(
+            req.params.id,
+            { sinopsis },
+            { new: true, runValidators: true }
+        );
+
+        if (!libroActualizado) {
+            return res.status(404).json({
+                success: false,
+                message: 'Libro no encontrado'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Sinopsis del libro actualizada exitosamente',
+            data: libroActualizado
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al actualizar la sinopsis del libro',
+            error: error.message
+        });
+    }
+});
+
 // Ruta para actualizar otros campos del libro
 router.put('/actualizar/:id/detalles', async (req, res) => {
     try {
         const {
             fecha_publicacion,
-            sinopsis,
             disponibilidad,
             paginas,
             generos,
@@ -267,7 +305,6 @@ router.put('/actualizar/:id/detalles', async (req, res) => {
         // Crear objeto con los campos a actualizar
         const camposActualizar = {};
         if (fecha_publicacion) camposActualizar.fecha_publicacion = new Date(fecha_publicacion);
-        if (sinopsis) camposActualizar.sinopsis = sinopsis;
         if (disponibilidad !== undefined) camposActualizar.disponibilidad = disponibilidad;
         if (paginas) camposActualizar.paginas = paginas;
         if (generos) camposActualizar.generos = generos;
@@ -276,7 +313,7 @@ router.put('/actualizar/:id/detalles', async (req, res) => {
         const libroActualizado = await Libro.findByIdAndUpdate(
             req.params.id,
             camposActualizar,
-            { new: true }
+            { new: true, runValidators: true }
         );
 
         if (!libroActualizado) {

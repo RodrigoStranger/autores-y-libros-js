@@ -123,4 +123,119 @@ router.get('/:id/libros', async (req, res) => {
     }
 });
 
+// Ruta para actualizar el nombre de un género
+router.put('/actualizar/:id/nombre', async (req, res) => {
+    try {
+        const { nombre } = req.body;
+
+        if (!nombre) {
+            return res.status(400).json({
+                success: false,
+                message: 'El nombre es requerido'
+            });
+        }
+
+        const generoActualizado = await Genero.findByIdAndUpdate(
+            req.params.id,
+            { nombre },
+            { new: true, runValidators: true }
+        );
+
+        if (!generoActualizado) {
+            return res.status(404).json({
+                success: false,
+                message: 'Género no encontrado'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Nombre del género actualizado exitosamente',
+            data: generoActualizado
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al actualizar el nombre del género',
+            error: error.message
+        });
+    }
+});
+
+// Ruta para actualizar la descripción de un género
+router.put('/actualizar/:id/descripcion', async (req, res) => {
+    try {
+        const { descripcion } = req.body;
+
+        if (!descripcion) {
+            return res.status(400).json({
+                success: false,
+                message: 'La descripción es requerida'
+            });
+        }
+
+        const generoActualizado = await Genero.findByIdAndUpdate(
+            req.params.id,
+            { descripcion },
+            { new: true, runValidators: true }
+        );
+
+        if (!generoActualizado) {
+            return res.status(404).json({
+                success: false,
+                message: 'Género no encontrado'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Descripción del género actualizada exitosamente',
+            data: generoActualizado
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al actualizar la descripción del género',
+            error: error.message
+        });
+    }
+});
+
+// Ruta para eliminar un género y actualizar los libros relacionados
+router.delete('/:id', async (req, res) => {
+    try {
+        const genero = await Genero.findById(req.params.id);
+        
+        if (!genero) {
+            return res.status(404).json({
+                success: false,
+                message: 'Género no encontrado'
+            });
+        }
+
+        // Obtener el nombre del género antes de eliminarlo
+        const nombreGenero = genero.nombre;
+
+        // Eliminar el género
+        await Genero.findByIdAndDelete(req.params.id);
+
+        // Actualizar todos los libros que contienen este género
+        await mongoose.connection.collection('Libros').updateMany(
+            { generos: nombreGenero },
+            { $pull: { generos: nombreGenero } }
+        );
+
+        res.status(200).json({
+            success: true,
+            message: 'Género eliminado exitosamente y actualizados los libros relacionados'
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al eliminar el género',
+            error: error.message
+        });
+    }
+});
+
 module.exports = router;
