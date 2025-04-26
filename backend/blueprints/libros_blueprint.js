@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { mongoose } = require('../models/mongo_connection_pool');
 const { Libro } = require('../models/mongo_libros_model');
 
 // Ruta para agregar un nuevo libro
@@ -35,6 +36,33 @@ router.post('/crear_libro', async (req, res) => {
         res.status(400).json({
             success: false,
             message: 'Error al agregar el libro',
+            error: error.message
+        });
+    }
+});
+
+// Ruta para listar libros disponibles
+router.get('/', async (req, res) => {
+    try {
+        const librosDisponibles = await mongoose.connection.collection('Libros').find({ disponibilidad: true }).toArray();
+        
+        if (librosDisponibles.length === 0) {
+            return res.status(200).json({
+                success: true,
+                message: 'No hay libros disponibles en este momento',
+                data: []
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Libros disponibles encontrados',
+            data: librosDisponibles
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al buscar libros disponibles',
             error: error.message
         });
     }
