@@ -62,12 +62,6 @@ const LibroSchema = new Schema({
         validate: [
             {
                 validator: function(v) {
-                    return v.length > 0; // Debe tener al menos un género
-                },
-                message: 'El libro debe tener al menos un género'
-            },
-            {
-                validator: function(v) {
                     // Verificar que no haya géneros duplicados
                     const generosUnicos = new Set(v);
                     return generosUnicos.size === v.length;
@@ -99,12 +93,6 @@ const LibroSchema = new Schema({
         type: [String],
         required: true,
         validate: [
-            {
-                validator: function(v) {
-                    return v.length > 0; // Debe tener al menos un autor
-                },
-                message: 'El libro debe tener al menos un autor'
-            },
             {
                 validator: function(v) {
                     // Verificar que no haya autores duplicados

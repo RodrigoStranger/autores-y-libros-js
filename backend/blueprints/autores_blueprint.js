@@ -124,4 +124,41 @@ router.get('/:id/libros', async (req, res) => {
     }
 });
 
+// Ruta para eliminar un autor y actualizar los libros relacionados
+router.delete('/:id', async (req, res) => {
+    try {
+        const autor = await Autor.findById(req.params.id);
+        
+        if (!autor) {
+            return res.status(404).json({
+                success: false,
+                message: 'Autor no encontrado'
+            });
+        }
+
+        // Obtener el nombre del autor antes de eliminarlo
+        const nombreAutor = autor.nombre;
+
+        // Eliminar el autor
+        await Autor.findByIdAndDelete(req.params.id);
+
+        // Actualizar todos los libros que contienen este autor
+        await mongoose.connection.collection('Libros').updateMany(
+            { autores: nombreAutor },
+            { $pull: { autores: nombreAutor } }
+        );
+
+        res.status(200).json({
+            success: true,
+            message: 'Autor eliminado exitosamente y actualizados los libros relacionados'
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al eliminar el autor',
+            error: error.message
+        });
+    }
+});
+
 module.exports = router;
