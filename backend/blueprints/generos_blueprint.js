@@ -135,6 +135,7 @@ router.put('/actualizar/:id/nombre', async (req, res) => {
             });
         }
 
+        // Obtener el género actualizado
         const generoActualizado = await Genero.findByIdAndUpdate(
             req.params.id,
             { nombre },
@@ -148,19 +149,45 @@ router.put('/actualizar/:id/nombre', async (req, res) => {
             });
         }
 
+        // Actualizar todos los libros que contienen el género antiguo
+        await mongoose.connection.collection('Libros').updateMany(
+            { generos: generoActualizado.nombre }, // Buscar todos los libros con el género antiguo
+            [
+                { 
+                    $set: { 
+                        generos: {
+                            $map: { 
+                                input: "$generos", // Operar sobre el arreglo generos
+                                as: "genero", 
+                                in: { 
+                                    $cond: {
+                                        if: { $eq: ["$$genero", generoActualizado.nombre] }, // Si el género es el antiguo
+                                        then: nombre, // Reemplazarlo por el nuevo nombre
+                                        else: "$$genero" // Si no es el antiguo, mantenerlo igual
+                                    }
+                                }
+                            }
+                        }
+                    } 
+                }
+            ]
+        );
+
         res.status(200).json({
             success: true,
-            message: 'Nombre del género actualizado exitosamente',
+            message: 'Nombre del género actualizado exitosamente y libros relacionados actualizados',
             data: generoActualizado
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Error al actualizar el nombre del género',
+            message: 'Error al actualizar el nombre del género o los libros relacionados',
             error: error.message
         });
     }
 });
+
+
 
 // Ruta para actualizar la descripción de un género
 router.put('/actualizar/:id/descripcion', async (req, res) => {

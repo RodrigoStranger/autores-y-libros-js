@@ -124,6 +124,48 @@ router.get('/:id/libros', async (req, res) => {
     }
 });
 
+// Ruta para actualizar el nombre y la descripción de un autor
+router.put('/actualizar/:id', async (req, res) => {
+    try {
+        const { nombre, descripcion } = req.body;
+
+        // Actualizar el autor en la base de datos
+        const autorActualizado = await Autor.findByIdAndUpdate(
+            req.params.id,
+            { nombre, descripcion },
+            { new: true, runValidators: true }
+        );
+
+        // Verificar si el autor fue encontrado
+        if (!autorActualizado) {
+            return res.status(404).json({
+                success: false,
+                message: 'Autor no encontrado'
+            });
+        }
+
+        // Actualizar todos los libros que contienen el nombre del autor
+        await mongoose.connection.collection('Libros').updateMany(
+            { autores: autorActualizado.nombre },
+            { $set: { 'autores.$': autorActualizado.nombre } }
+        );
+
+        // Responder con el autor actualizado
+        res.status(200).json({
+            success: true,
+            message: 'Nombre y descripción del autor actualizados exitosamente y libros relacionados actualizados',
+            data: autorActualizado
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al actualizar el autor o los libros relacionados',
+            error: error.message
+        });
+    }
+});
+
+
 // Ruta para eliminar un autor y actualizar los libros relacionados
 router.delete('/:id', async (req, res) => {
     try {
