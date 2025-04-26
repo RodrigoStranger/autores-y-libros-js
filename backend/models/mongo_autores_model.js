@@ -1,4 +1,4 @@
-const mongoose = require('./mongo_connection_pool');
+const mongoose = require('./backend/models/mongo_connection_pool');
 
 // Esquema de Autor
 const AutorSchema = new Schema({
