@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { Genero } = require('../models/mongo_generos_model');
+const { Libro } = require('../models/mongo_libros_model');
 const mongoose = require('mongoose');
 
 // Ruta para crear un nuevo género
@@ -135,42 +136,26 @@ router.put('/actualizar/:id/nombre', async (req, res) => {
             });
         }
 
-        // Obtener el género actualizado
-        const generoActualizado = await Genero.findByIdAndUpdate(
-            req.params.id,
-            { nombre },
-            { new: true, runValidators: true }
-        );
-
-        if (!generoActualizado) {
+        // Obtener el género actual antes de actualizarlo
+        const generoActual = await Genero.findById(req.params.id);
+        if (!generoActual) {
             return res.status(404).json({
                 success: false,
                 message: 'Género no encontrado'
             });
         }
 
+        // Actualizar el género
+        const generoActualizado = await Genero.findByIdAndUpdate(
+            req.params.id,
+            { nombre },
+            { new: true, runValidators: true }
+        );
+
         // Actualizar todos los libros que contienen el género antiguo
         await mongoose.connection.collection('Libros').updateMany(
-            { generos: generoActualizado.nombre }, // Buscar todos los libros con el género antiguo
-            [
-                { 
-                    $set: { 
-                        generos: {
-                            $map: { 
-                                input: "$generos", // Operar sobre el arreglo generos
-                                as: "genero", 
-                                in: { 
-                                    $cond: {
-                                        if: { $eq: ["$$genero", generoActualizado.nombre] }, // Si el género es el antiguo
-                                        then: nombre, // Reemplazarlo por el nuevo nombre
-                                        else: "$$genero" // Si no es el antiguo, mantenerlo igual
-                                    }
-                                }
-                            }
-                        }
-                    } 
-                }
-            ]
+            { generos: generoActual.nombre },
+            { $set: { 'generos.$': nombre } }
         );
 
         res.status(200).json({
@@ -186,8 +171,6 @@ router.put('/actualizar/:id/nombre', async (req, res) => {
         });
     }
 });
-
-
 
 // Ruta para actualizar la descripción de un género
 router.put('/actualizar/:id/descripcion', async (req, res) => {
@@ -246,8 +229,8 @@ router.delete('/:id', async (req, res) => {
         // Eliminar el género
         await Genero.findByIdAndDelete(req.params.id);
 
-        // Actualizar todos los libros que contienen este género
-        await mongoose.connection.collection('Libros').updateMany(
+        // Actualizar todos los libros que contienen este género usando el modelo Libro
+        await Libro.updateMany(
             { generos: nombreGenero },
             { $pull: { generos: nombreGenero } }
         );
