@@ -1,7 +1,7 @@
 const { mongoose } = require('./mongo_connection_pool');
 const { Schema } = mongoose;
 
-// Esquema de Género
+// Esquema de Genero
 const GeneroSchema = new Schema({
     nombre: { 
         type: String,
@@ -11,7 +11,6 @@ const GeneroSchema = new Schema({
     descripcion: { 
         type: String,
         required: true,
-        unique: true,
     }
 });
 

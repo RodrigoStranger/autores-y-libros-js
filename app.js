@@ -1,5 +1,8 @@
 const express = require('express');
 const cors = require('cors');
+// Importar los modelos
+require('./backend/models/mongo_generos_model');
+require('./backend/models/mongo_autores_model');
 const librosBlueprint = require('./backend/blueprints/libros_blueprint');
 
 const app = express();

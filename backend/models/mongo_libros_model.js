@@ -6,7 +6,19 @@ const LibroSchema = new Schema({
     titulo: { 
         type: String, 
         required: true,
-        unique: true 
+        validate: {
+            validator: async function(v) {
+                try {
+                    const libroExistente = await mongoose.connection.collection('Libros').findOne({ titulo: v });
+                    if (libroExistente) {
+                        throw new Error('Ya existe un libro con este título');
+                    }
+                    return true;
+                } catch (error) {
+                    throw new Error(`Error al validar título: ${error.message}`);
+                }
+            }
+        }
     },
     fecha_publicacion: {
         type: Date, 
@@ -20,8 +32,20 @@ const LibroSchema = new Schema({
     },
     sinopsis: { 
         type: String, 
-        required: true, 
-        unique: true 
+        required: true,
+        validate: {
+            validator: async function(v) {
+                try {
+                    const libroExistente = await mongoose.connection.collection('Libros').findOne({ sinopsis: v });
+                    if (libroExistente) {
+                        throw new Error('Ya existe un libro con esta sinopsis');
+                    }
+                    return true;
+                } catch (error) {
+                    throw new Error(`Error al validar sinopsis: ${error.message}`);
+                }
+            }
+        }
     },
     disponibilidad: { 
         type: Boolean, 
@@ -32,30 +56,68 @@ const LibroSchema = new Schema({
         required: true, 
         min: [1, 'El número de páginas debe ser mayor a 0.']
     },
-    generos: [{
-        type: String, 
+    generos: {
+        type: [String],
         required: true,
-        validate: {
-            validator: async function(v) {
-                // Verificar que el género exista en el esquema "Generos"
-                const generoExists = await mongoose.model('Genero').exists({ nombre: { $in: v } });
-                return generoExists;
+        validate: [
+            {
+                validator: function(v) {
+                    return v.length > 0; // Debe tener al menos un género
+                },
+                message: 'El libro debe tener al menos un género'
             },
-            message: props => `El género(s) ${props.value} no existe en el esquema de géneros.`
-        }
-    }],
-    autores: [{
-        type: String,
+            {
+                validator: async function(v) {
+                    try {
+                        const generosNoExistentes = [];
+                        for (const genero of v) {
+                            const generoExistente = await mongoose.connection.collection('Generos').findOne({ nombre: genero });
+                            if (!generoExistente) {
+                                generosNoExistentes.push(genero);
+                            }
+                        }
+                        if (generosNoExistentes.length > 0) {
+                            throw new Error(`Los siguientes géneros no existen: ${generosNoExistentes.join(', ')}`);
+                        }
+                        return true;
+                    } catch (error) {
+                        throw new Error(`Error al validar géneros: ${error.message}`);
+                    }
+                }
+            }
+        ]
+    },
+    autores: {
+        type: [String],
         required: true,
-        validate: {
-            validator: async function(v) {
-                // Verificar que el autor exista en el esquema "Autores"
-                const autorExists = await mongoose.model('Autor').exists({ nombre: { $in: v } });
-                return autorExists;
+        validate: [
+            {
+                validator: function(v) {
+                    return v.length > 0; // Debe tener al menos un autor
+                },
+                message: 'El libro debe tener al menos un autor'
             },
-            message: props => `El autor(s) ${props.value} no existe en el esquema de autores.`
-        }
-    }]
+            {
+                validator: async function(v) {
+                    try {
+                        const autoresNoExistentes = [];
+                        for (const autor of v) {
+                            const autorExistente = await mongoose.connection.collection('Autores').findOne({ nombre: autor });
+                            if (!autorExistente) {
+                                autoresNoExistentes.push(autor);
+                            }
+                        }
+                        if (autoresNoExistentes.length > 0) {
+                            throw new Error(`Los siguientes autores no existen: ${autoresNoExistentes.join(', ')}`);
+                        }
+                        return true;
+                    } catch (error) {
+                        throw new Error(`Error al validar autores: ${error.message}`);
+                    }
+                }
+            }
+        ]
+    }
 });
 
 // Crear el modelo para Libro
