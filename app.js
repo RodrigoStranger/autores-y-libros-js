@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 // Rutas
-app.use('/api/libros', librosBlueprint);
+app.use('/casa/libros', librosBlueprint);
 
 // Puerto
 const PORT = process.env.PORT || 3000;
