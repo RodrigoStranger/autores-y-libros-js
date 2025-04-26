@@ -121,7 +121,7 @@ const LibroSchema = new Schema({
 });
 
 // Crear el modelo para Libro
-const Libro = mongoose.model("Libro", LibroSchema);
+const Libro = mongoose.model("Libro", LibroSchema, "Libros");
 
 // Exportar el modelo para usarlo en otros archivos
-module.exports =  { Libro };
+module.exports = { Libro };

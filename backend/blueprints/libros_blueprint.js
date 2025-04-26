@@ -15,24 +15,28 @@ router.post('/crear_libro', async (req, res) => {
             generos,
             autores
         } = req.body;
-        // Crear una nueva instancia del libro
+
+        // Crear una nueva instancia del libro usando el modelo
         const nuevoLibro = new Libro({
             titulo,
-            fecha_publicacion,
+            fecha_publicacion: new Date(fecha_publicacion),
             sinopsis,
-            disponibilidad,
+            disponibilidad: disponibilidad || true,
             paginas,
             generos,
             autores
         });
-        // Guardar el libro en la base de datos
+
+        // Guardar el libro usando el método save() del modelo
         const libroGuardado = await nuevoLibro.save();
+
         res.status(201).json({
             success: true,
             message: 'Libro agregado exitosamente',
             data: libroGuardado
         });
     } catch (error) {
+        console.error('Error al crear libro:', error);
         res.status(400).json({
             success: false,
             message: 'Error al agregar el libro',

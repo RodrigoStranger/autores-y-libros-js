@@ -44,7 +44,7 @@ const AutorSchema = new Schema({
 });
 
 // Crear el modelo para Autor
-const Autor = mongoose.model("Autor", AutorSchema);
+const Autor = mongoose.model("Autor", AutorSchema, "Autores");
 
 // Exportar el modelo para usarlo en otros archivos
 module.exports = { Autor };

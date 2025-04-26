@@ -40,7 +40,7 @@ const GeneroSchema = new Schema({
 });
 
 // Crear el modelo para Genero
-const Genero = mongoose.model("Genero", GeneroSchema);
+const Genero = mongoose.model("Genero", GeneroSchema, "Generos");
 
 // Exportar el modelo para usarlo en otros archivos
 module.exports = { Genero };
