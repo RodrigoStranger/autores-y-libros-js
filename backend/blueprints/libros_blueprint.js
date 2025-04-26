@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { mongoose } = require('../models/mongo_connection_pool');
 const { Libro } = require('../models/mongo_libros_model');
+const { verificarToken } = require('../../server_auth/authentication');
 
 // Ruta para agregar un nuevo libro
-router.post('/crear_libro', async (req, res) => {
+router.post('/crear_libro', verificarToken, async (req, res) => {
     try {
         const {
             titulo,
@@ -46,7 +47,7 @@ router.post('/crear_libro', async (req, res) => {
 });
 
 // Ruta para listar libros disponibles
-router.get('/', async (req, res) => {
+router.get('/', verificarToken, async (req, res) => {
     try {
         const librosDisponibles = await Libro.find({ disponibilidad: true });
         
@@ -73,7 +74,7 @@ router.get('/', async (req, res) => {
 });
 
 // Ruta para obtener un libro específico por ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', verificarToken, async (req, res) => {
     try {
         const libro = await Libro.findById(req.params.id);
         
@@ -99,7 +100,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Ruta para obtener los autores de un libro específico
-router.get('/:id/autores', async (req, res) => {
+router.get('/:id/autores', verificarToken, async (req, res) => {
     try {
         const libro = await Libro.findById(req.params.id);
         
@@ -130,7 +131,7 @@ router.get('/:id/autores', async (req, res) => {
 });
 
 // Ruta para desactivar un libro
-router.put('/:id/desactivar', async (req, res) => {
+router.put('/:id/desactivar', verificarToken, async (req, res) => {
     try {
         const libro = await Libro.findById(req.params.id);
         
@@ -172,7 +173,7 @@ router.put('/:id/desactivar', async (req, res) => {
 });
 
 // Ruta para activar un libro
-router.put('/:id/activar', async (req, res) => {
+router.put('/:id/activar', verificarToken, async (req, res) => {
     try {
         const libro = await Libro.findById(req.params.id);
         
@@ -214,7 +215,7 @@ router.put('/:id/activar', async (req, res) => {
 });
 
 // Ruta para actualizar el título de un libro
-router.put('/actualizar/:id/titulo', async (req, res) => {
+router.put('/actualizar/:id/titulo', verificarToken, async (req, res) => {
     try {
         const { titulo } = req.body;
 
@@ -253,7 +254,7 @@ router.put('/actualizar/:id/titulo', async (req, res) => {
 });
 
 // Ruta para actualizar la sinopsis de un libro
-router.put('/actualizar/:id/sinopsis', async (req, res) => {
+router.put('/actualizar/:id/sinopsis', verificarToken, async (req, res) => {
     try {
         const { sinopsis } = req.body;
 
@@ -292,7 +293,7 @@ router.put('/actualizar/:id/sinopsis', async (req, res) => {
 });
 
 // Ruta para actualizar otros campos del libro
-router.put('/actualizar/:id/detalles', async (req, res) => {
+router.put('/actualizar/:id/detalles', verificarToken, async (req, res) => {
     try {
         const {
             fecha_publicacion,
@@ -338,7 +339,7 @@ router.put('/actualizar/:id/detalles', async (req, res) => {
 });
 
 // Ruta para asignar un género a un libro
-router.put('/:id/asignar_genero', async (req, res) => {
+router.put('/:id/asignar_genero', verificarToken, async (req, res) => {
     try {
         const { genero } = req.body;
 
@@ -408,7 +409,7 @@ router.put('/:id/asignar_genero', async (req, res) => {
 });
 
 // Ruta para asignar un autor a un libro
-router.put('/:id/asignar_autor', async (req, res) => {
+router.put('/:id/asignar_autor', verificarToken, async (req, res) => {
     try {
         const { autor } = req.body;
 

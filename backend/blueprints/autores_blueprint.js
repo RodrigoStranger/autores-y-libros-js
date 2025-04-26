@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { Autor } = require('../models/mongo_autores_model');
 const mongoose = require('mongoose');
+const { verificarToken } = require('../../server_auth/authentication');
 
 // Ruta para crear un nuevo autor
-router.post('/crear_autor', async (req, res) => {
+router.post('/crear_autor', verificarToken, async (req, res) => {
     try {
         const { nombre, fecha_nacimiento, nacionalidad } = req.body;
 
@@ -33,7 +34,7 @@ router.post('/crear_autor', async (req, res) => {
 });
 
 // Ruta para listar todos los autores
-router.get('/', async (req, res) => {
+router.get('/', verificarToken, async (req, res) => {
     try {
         const autores = await Autor.find();
         
@@ -60,7 +61,7 @@ router.get('/', async (req, res) => {
 });
 
 // Ruta para obtener un autor específico por ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', verificarToken, async (req, res) => {
     try {
         const autor = await Autor.findById(req.params.id);
         
@@ -86,7 +87,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Ruta para obtener los libros de un autor específico
-router.get('/:id/libros', async (req, res) => {
+router.get('/:id/libros', verificarToken, async (req, res) => {
     try {
         const autor = await Autor.findById(req.params.id);
         
@@ -125,7 +126,7 @@ router.get('/:id/libros', async (req, res) => {
 });
 
 // Ruta para actualizar el nombre y la descripción de un autor
-router.put('/actualizar/:id', async (req, res) => {
+router.put('/actualizar/:id', verificarToken, async (req, res) => {
     try {
         const { nombre, descripcion } = req.body;
 
@@ -165,9 +166,8 @@ router.put('/actualizar/:id', async (req, res) => {
     }
 });
 
-
 // Ruta para eliminar un autor y actualizar los libros relacionados
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', verificarToken, async (req, res) => {
     try {
         const autor = await Autor.findById(req.params.id);
         

@@ -4,8 +4,10 @@ const { Genero } = require('../models/mongo_generos_model');
 const { Libro } = require('../models/mongo_libros_model');
 const mongoose = require('mongoose');
 
+const { verificarToken } = require('../../server_auth/authentication');
+
 // Ruta para crear un nuevo género
-router.post('/crear_genero', async (req, res) => {
+router.post('/crear_genero', verificarToken, async (req, res) => {
     try {
         const { nombre, descripcion } = req.body;
 
@@ -33,7 +35,7 @@ router.post('/crear_genero', async (req, res) => {
 });
 
 // Ruta para listar todos los géneros
-router.get('/', async (req, res) => {
+router.get('/', verificarToken, async (req, res) => {
     try {
         const generos = await Genero.find();
         
@@ -60,7 +62,7 @@ router.get('/', async (req, res) => {
 });
 
 // Ruta para obtener un género específico por ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', verificarToken, async (req, res) => {
     try {
         const genero = await Genero.findById(req.params.id);
         
@@ -86,7 +88,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Ruta para obtener los libros de un género específico
-router.get('/:id/libros', async (req, res) => {
+router.get('/:id/libros', verificarToken, async (req, res) => {
     try {
         const genero = await Genero.findById(req.params.id);
         
@@ -125,7 +127,7 @@ router.get('/:id/libros', async (req, res) => {
 });
 
 // Ruta para actualizar el nombre de un género
-router.put('/actualizar/:id/nombre', async (req, res) => {
+router.put('/actualizar/:id/nombre', verificarToken, async (req, res) => {
     try {
         const { nombre } = req.body;
 
@@ -173,7 +175,7 @@ router.put('/actualizar/:id/nombre', async (req, res) => {
 });
 
 // Ruta para actualizar la descripción de un género
-router.put('/actualizar/:id/descripcion', async (req, res) => {
+router.put('/actualizar/:id/descripcion', verificarToken, async (req, res) => {
     try {
         const { descripcion } = req.body;
 
@@ -212,7 +214,7 @@ router.put('/actualizar/:id/descripcion', async (req, res) => {
 });
 
 // Ruta para eliminar un género y actualizar los libros relacionados
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', verificarToken, async (req, res) => {
     try {
         const genero = await Genero.findById(req.params.id);
         
@@ -229,7 +231,7 @@ router.delete('/:id', async (req, res) => {
         // Eliminar el género
         await Genero.findByIdAndDelete(req.params.id);
 
-        // Actualizar todos los libros que contienen este género usando el modelo Libro
+        // Actualizar todos los libros que contienen este género
         await Libro.updateMany(
             { generos: nombreGenero },
             { $pull: { generos: nombreGenero } }
