@@ -67,6 +67,14 @@ const LibroSchema = new Schema({
                 message: 'El libro debe tener al menos un género'
             },
             {
+                validator: function(v) {
+                    // Verificar que no haya géneros duplicados
+                    const generosUnicos = new Set(v);
+                    return generosUnicos.size === v.length;
+                },
+                message: 'No se permiten géneros duplicados'
+            },
+            {
                 validator: async function(v) {
                     try {
                         const generosNoExistentes = [];
@@ -96,6 +104,14 @@ const LibroSchema = new Schema({
                     return v.length > 0; // Debe tener al menos un autor
                 },
                 message: 'El libro debe tener al menos un autor'
+            },
+            {
+                validator: function(v) {
+                    // Verificar que no haya autores duplicados
+                    const autoresUnicos = new Set(v);
+                    return autoresUnicos.size === v.length;
+                },
+                message: 'No se permiten autores duplicados'
             },
             {
                 validator: async function(v) {

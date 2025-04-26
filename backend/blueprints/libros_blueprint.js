@@ -213,4 +213,219 @@ router.put('/:id/activar', async (req, res) => {
     }
 });
 
+// Ruta para actualizar el título de un libro
+router.put('/actualizar/:id/titulo', async (req, res) => {
+    try {
+        const { titulo } = req.body;
+
+        if (!titulo) {
+            return res.status(400).json({
+                success: false,
+                message: 'El título es requerido'
+            });
+        }
+
+        const libroActualizado = await Libro.findByIdAndUpdate(
+            req.params.id,
+            { titulo },
+            { new: true }
+        );
+
+        if (!libroActualizado) {
+            return res.status(404).json({
+                success: false,
+                message: 'Libro no encontrado'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Título del libro actualizado exitosamente',
+            data: libroActualizado
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al actualizar el título del libro',
+            error: error.message
+        });
+    }
+});
+
+// Ruta para actualizar otros campos del libro
+router.put('/actualizar/:id/detalles', async (req, res) => {
+    try {
+        const {
+            fecha_publicacion,
+            sinopsis,
+            disponibilidad,
+            paginas,
+            generos,
+            autores
+        } = req.body;
+
+        // Crear objeto con los campos a actualizar
+        const camposActualizar = {};
+        if (fecha_publicacion) camposActualizar.fecha_publicacion = new Date(fecha_publicacion);
+        if (sinopsis) camposActualizar.sinopsis = sinopsis;
+        if (disponibilidad !== undefined) camposActualizar.disponibilidad = disponibilidad;
+        if (paginas) camposActualizar.paginas = paginas;
+        if (generos) camposActualizar.generos = generos;
+        if (autores) camposActualizar.autores = autores;
+
+        const libroActualizado = await Libro.findByIdAndUpdate(
+            req.params.id,
+            camposActualizar,
+            { new: true }
+        );
+
+        if (!libroActualizado) {
+            return res.status(404).json({
+                success: false,
+                message: 'Libro no encontrado'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Libro actualizado exitosamente',
+            data: libroActualizado
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al actualizar el libro',
+            error: error.message
+        });
+    }
+});
+
+// Ruta para asignar un género a un libro
+router.put('/:id/asignar_genero', async (req, res) => {
+    try {
+        const { genero } = req.body;
+
+        if (!genero) {
+            return res.status(400).json({
+                success: false,
+                message: 'El género es requerido'
+            });
+        }
+
+        // Verificar si el género existe
+        const generoExistente = await mongoose.connection.collection('Generos').findOne({ nombre: genero });
+        if (!generoExistente) {
+            return res.status(404).json({
+                success: false,
+                message: 'El género no existe'
+            });
+        }
+
+        // Obtener el libro
+        const libro = await Libro.findById(req.params.id);
+        if (!libro) {
+            return res.status(404).json({
+                success: false,
+                message: 'Libro no encontrado'
+            });
+        }
+
+        // Verificar si el género ya está asignado al libro
+        if (libro.generos.includes(genero)) {
+            return res.status(200).json({
+                success: true,
+                message: 'El género ya está asignado al libro',
+                data: libro
+            });
+        }
+
+        // Agregar el género al libro
+        libro.generos.push(genero);
+        const libroActualizado = await libro.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Género asignado al libro exitosamente',
+            data: libroActualizado
+        });
+    } catch (error) {
+        if (error.message.includes('No se permiten géneros duplicados')) {
+            return res.status(400).json({
+                success: false,
+                message: 'No se permiten géneros duplicados',
+                error: error.message
+            });
+        }
+        res.status(500).json({
+            success: false,
+            message: 'Error al asignar el género al libro',
+            error: error.message
+        });
+    }
+});
+
+// Ruta para asignar un autor a un libro
+router.put('/:id/asignar_autor', async (req, res) => {
+    try {
+        const { autor } = req.body;
+
+        if (!autor) {
+            return res.status(400).json({
+                success: false,
+                message: 'El autor es requerido'
+            });
+        }
+
+        // Verificar si el autor existe
+        const autorExistente = await mongoose.connection.collection('Autores').findOne({ nombre: autor });
+        if (!autorExistente) {
+            return res.status(404).json({
+                success: false,
+                message: 'El autor no existe'
+            });
+        }
+
+        // Obtener el libro
+        const libro = await Libro.findById(req.params.id);
+        if (!libro) {
+            return res.status(404).json({
+                success: false,
+                message: 'Libro no encontrado'
+            });
+        }
+
+        // Verificar si el autor ya está asignado al libro
+        if (libro.autores.includes(autor)) {
+            return res.status(200).json({
+                success: true,
+                message: 'El autor ya está asignado al libro',
+                data: libro
+            });
+        }
+
+        // Agregar el autor al libro
+        libro.autores.push(autor);
+        const libroActualizado = await libro.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Autor asignado al libro exitosamente',
+            data: libroActualizado
+        });
+    } catch (error) {
+        if (error.message.includes('No se permiten autores duplicados')) {
+            return res.status(400).json({
+                success: false,
+                message: 'No se permiten autores duplicados',
+                error: error.message
+            });
+        }
+        res.status(500).json({
+            success: false,
+            message: 'Error al asignar el autor al libro',
+            error: error.message
+        });
+    }
+});
+
 module.exports = router;
