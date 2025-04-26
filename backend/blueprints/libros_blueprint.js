@@ -48,7 +48,7 @@ router.post('/crear_libro', async (req, res) => {
 // Ruta para listar libros disponibles
 router.get('/', async (req, res) => {
     try {
-        const librosDisponibles = await mongoose.connection.collection('Libros').find({ disponibilidad: true }).toArray();
+        const librosDisponibles = await Libro.find({ disponibilidad: true });
         
         if (librosDisponibles.length === 0) {
             return res.status(200).json({
