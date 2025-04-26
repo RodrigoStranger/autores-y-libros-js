@@ -129,4 +129,88 @@ router.get('/:id/autores', async (req, res) => {
     }
 });
 
+// Ruta para desactivar un libro
+router.put('/:id/desactivar', async (req, res) => {
+    try {
+        const libro = await Libro.findById(req.params.id);
+        
+        if (!libro) {
+            return res.status(404).json({
+                success: false,
+                message: 'Libro no encontrado'
+            });
+        }
+
+        // Verificar si el libro ya está desactivado
+        if (libro.disponibilidad === false) {
+            return res.status(200).json({
+                success: true,
+                message: 'El libro ya está desactivado',
+                data: libro
+            });
+        }
+
+        // Desactivar el libro usando findByIdAndUpdate
+        const libroActualizado = await Libro.findByIdAndUpdate(
+            req.params.id,
+            { disponibilidad: false },
+            { new: true }
+        );
+
+        res.status(200).json({
+            success: true,
+            message: 'Libro desactivado exitosamente',
+            data: libroActualizado
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al desactivar el libro',
+            error: error.message
+        });
+    }
+});
+
+// Ruta para activar un libro
+router.put('/:id/activar', async (req, res) => {
+    try {
+        const libro = await Libro.findById(req.params.id);
+        
+        if (!libro) {
+            return res.status(404).json({
+                success: false,
+                message: 'Libro no encontrado'
+            });
+        }
+
+        // Verificar si el libro ya está activado
+        if (libro.disponibilidad === true) {
+            return res.status(200).json({
+                success: true,
+                message: 'El libro ya está activado',
+                data: libro
+            });
+        }
+
+        // Activar el libro usando findByIdAndUpdate
+        const libroActualizado = await Libro.findByIdAndUpdate(
+            req.params.id,
+            { disponibilidad: true },
+            { new: true }
+        );
+
+        res.status(200).json({
+            success: true,
+            message: 'Libro activado exitosamente',
+            data: libroActualizado
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al activar el libro',
+            error: error.message
+        });
+    }
+});
+
 module.exports = router;
