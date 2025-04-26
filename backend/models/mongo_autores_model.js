@@ -5,8 +5,20 @@ const { Schema } = mongoose;
 const AutorSchema = new Schema({
     nombre: { 
         type: String, 
-        required: true, 
-        unique: true,  // El nombre del autor debe ser único
+        required: true,
+        validate: {
+            validator: async function(v) {
+                try {
+                    const autorExistente = await mongoose.connection.collection('Autores').findOne({ nombre: v });
+                    if (autorExistente) {
+                        throw new Error('Ya existe un autor con este nombre');
+                    }
+                    return true;
+                } catch (error) {
+                    throw new Error(`Error al validar nombre: ${error.message}`);
+                }
+            }
+        }
     },
     fecha_nacimiento: { 
         type: Date, 
